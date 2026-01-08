@@ -4,8 +4,8 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-from src.models.audit import AuditAction, AuditLogEntry, AuditResult
-from src.models.user import User
+from models.audit import AuditAction, AuditLogEntry, AuditResult
+from models.user import User
 
 # Default audit log path
 AUDIT_LOG_PATH = Path("audit_logs/audit.log")

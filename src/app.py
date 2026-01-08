@@ -6,11 +6,11 @@ from datetime import datetime
 import streamlit as st
 from dotenv import load_dotenv
 
-from src.components.job_table import render_job_table
-from src.components.status_bar import render_connection_status, render_status_bar
-from src.models.exceptions import JenkinsConnectionError
-from src.models.user import User
-from src.services.auth import (
+from components.job_table import render_job_table
+from components.status_bar import render_connection_status, render_status_bar
+from models.exceptions import JenkinsConnectionError
+from models.user import User
+from services.auth import (
     authenticate_user,
     check_authorization,
     get_client_ip,
@@ -18,9 +18,9 @@ from src.services.auth import (
     render_access_denied_page,
     render_login_page,
 )
-from src.services.audit import AuditService
-from src.services.dashboard import DashboardService
-from src.services.jenkins import JenkinsService
+from services.audit import AuditService
+from services.dashboard import DashboardService
+from services.jenkins import JenkinsService
 
 # Load environment variables
 load_dotenv()

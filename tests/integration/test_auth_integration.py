@@ -5,8 +5,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.models.user import User
-from src.services.auth import authenticate_user, check_authorization, logout_user
+from models.user import User
+from services.auth import authenticate_user, check_authorization, logout_user
 
 
 class TestAuthenticationFlow:
@@ -23,7 +23,7 @@ class TestAuthenticationFlow:
             "groups": ["PM"],
         }.get(key, default)
 
-        with patch("src.services.auth.st") as mock_st:
+        with patch("services.auth.st") as mock_st:
             mock_st.user = mock_st_user
 
             user = authenticate_user()
@@ -43,7 +43,7 @@ class TestAuthenticationFlow:
             "groups": ["RD_Manager"],
         }.get(key, default)
 
-        with patch("src.services.auth.st") as mock_st:
+        with patch("services.auth.st") as mock_st:
             mock_st.user = mock_st_user
 
             user = authenticate_user()
@@ -62,7 +62,7 @@ class TestAuthenticationFlow:
             "groups": ["Developer"],
         }.get(key, default)
 
-        with patch("src.services.auth.st") as mock_st:
+        with patch("services.auth.st") as mock_st:
             mock_st.user = mock_st_user
 
             user = authenticate_user()
@@ -75,7 +75,7 @@ class TestAuthenticationFlow:
         mock_st_user = MagicMock()
         mock_st_user.is_logged_in = False
 
-        with patch("src.services.auth.st") as mock_st:
+        with patch("services.auth.st") as mock_st:
             mock_st.user = mock_st_user
 
             user = authenticate_user()
@@ -92,8 +92,8 @@ class TestAuthenticationFlow:
             login_time=datetime(2026, 1, 8, 10, 0, 0),
         )
 
-        with patch("src.services.auth.st") as mock_st:
-            with patch("src.services.auth.log_event") as mock_log:
+        with patch("services.auth.st") as mock_st:
+            with patch("services.auth.log_event") as mock_log:
                 logout_user(user, "192.168.1.100")
 
                 mock_st.logout.assert_called_once()

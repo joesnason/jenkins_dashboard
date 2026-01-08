@@ -2,8 +2,8 @@
 
 import streamlit as st
 
-from src.components.job_card import get_status_emoji, render_job_details
-from src.models.job import JenkinsJob, JobStatus
+from components.job_card import get_status_emoji, render_job_details
+from models.job import JenkinsJob, JobStatus
 
 
 def render_job_table(jobs: list[JenkinsJob]) -> None:

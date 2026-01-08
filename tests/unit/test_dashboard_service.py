@@ -4,9 +4,9 @@ from datetime import datetime
 
 import pytest
 
-from src.models.job import JenkinsJob, JobStatus
-from src.models.state import DashboardState
-from src.services.dashboard import DashboardService, calculate_statistics
+from models.job import JenkinsJob, JobStatus
+from models.state import DashboardState
+from services.dashboard import DashboardService, calculate_statistics
 
 
 class TestCalculateStatistics:

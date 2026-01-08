@@ -5,9 +5,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.models.exceptions import JenkinsAuthError, JenkinsConnectionError
-from src.models.job import JenkinsJob, JobStatus
-from src.services.jenkins import JenkinsService
+from models.exceptions import JenkinsAuthError, JenkinsConnectionError
+from models.job import JenkinsJob, JobStatus
+from services.jenkins import JenkinsService
 
 
 class TestJenkinsIntegration:
@@ -29,7 +29,7 @@ class TestJenkinsIntegration:
     ) -> None:
         """Test JenkinsService can connect to Jenkins server."""
         with patch.dict(os.environ, mock_env_vars):
-            with patch("src.services.jenkins.jenkins.Jenkins") as mock_jenkins:
+            with patch("services.jenkins.jenkins.Jenkins") as mock_jenkins:
                 mock_jenkins.return_value = mock_jenkins_server
                 service = JenkinsService()
 
@@ -44,7 +44,7 @@ class TestJenkinsIntegration:
     ) -> None:
         """Test JenkinsService fetches all jobs from Jenkins."""
         with patch.dict(os.environ, mock_env_vars):
-            with patch("src.services.jenkins.jenkins.Jenkins") as mock_jenkins:
+            with patch("services.jenkins.jenkins.Jenkins") as mock_jenkins:
                 mock_jenkins.return_value = mock_jenkins_server
 
                 # Setup mock responses for job details
@@ -74,7 +74,7 @@ class TestJenkinsIntegration:
     ) -> None:
         """Test JenkinsService handles authentication failures."""
         with patch.dict(os.environ, mock_env_vars):
-            with patch("src.services.jenkins.jenkins.Jenkins") as mock_jenkins:
+            with patch("services.jenkins.jenkins.Jenkins") as mock_jenkins:
                 mock_server = MagicMock()
                 mock_server.get_all_jobs.side_effect = Exception("401 Unauthorized")
                 mock_jenkins.return_value = mock_server
@@ -90,7 +90,7 @@ class TestJenkinsIntegration:
     ) -> None:
         """Test JenkinsService handles connection failures."""
         with patch.dict(os.environ, mock_env_vars):
-            with patch("src.services.jenkins.jenkins.Jenkins") as mock_jenkins:
+            with patch("services.jenkins.jenkins.Jenkins") as mock_jenkins:
                 mock_server = MagicMock()
                 mock_server.get_all_jobs.side_effect = Exception("Connection refused")
                 mock_jenkins.return_value = mock_server
@@ -108,7 +108,7 @@ class TestJenkinsIntegration:
     ) -> None:
         """Test fetching detailed job information."""
         with patch.dict(os.environ, mock_env_vars):
-            with patch("src.services.jenkins.jenkins.Jenkins") as mock_jenkins:
+            with patch("services.jenkins.jenkins.Jenkins") as mock_jenkins:
                 mock_server = MagicMock()
                 mock_server.get_job_info.return_value = mock_job_info
                 mock_server.get_build_info.return_value = mock_build_info
@@ -129,7 +129,7 @@ class TestJenkinsIntegration:
     ) -> None:
         """Test handling jobs that have never been built."""
         with patch.dict(os.environ, mock_env_vars):
-            with patch("src.services.jenkins.jenkins.Jenkins") as mock_jenkins:
+            with patch("services.jenkins.jenkins.Jenkins") as mock_jenkins:
                 mock_server = MagicMock()
                 mock_server.get_job_info.return_value = {
                     "name": "new-job",

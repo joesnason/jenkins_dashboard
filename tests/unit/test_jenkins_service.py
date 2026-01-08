@@ -5,9 +5,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.models.exceptions import JenkinsAuthError, JenkinsConnectionError
-from src.models.job import JenkinsJob, JobStatus
-from src.services.jenkins import JenkinsService, color_to_status
+from models.exceptions import JenkinsAuthError, JenkinsConnectionError
+from models.job import JenkinsJob, JobStatus
+from services.jenkins import JenkinsService, color_to_status
 
 
 class TestColorToStatus:

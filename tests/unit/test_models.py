@@ -4,10 +4,10 @@ from datetime import datetime
 
 import pytest
 
-from src.models.audit import AuditAction, AuditLogEntry, AuditResult
-from src.models.job import JenkinsJob, JobStatus
-from src.models.state import DashboardState
-from src.models.user import User
+from models.audit import AuditAction, AuditLogEntry, AuditResult
+from models.job import JenkinsJob, JobStatus
+from models.state import DashboardState
+from models.user import User
 
 
 class TestJenkinsJob:

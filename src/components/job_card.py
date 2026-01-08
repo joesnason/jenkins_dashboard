@@ -2,7 +2,7 @@
 
 import streamlit as st
 
-from src.models.job import JenkinsJob, JobStatus
+from models.job import JenkinsJob, JobStatus
 
 
 def get_status_color(status: JobStatus) -> str:

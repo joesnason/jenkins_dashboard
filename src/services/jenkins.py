@@ -5,11 +5,11 @@ from datetime import datetime
 
 import jenkins
 
-from src.models.exceptions import (
+from models.exceptions import (
     JenkinsConnectionError,
     JenkinsJobNotFoundError,
 )
-from src.models.job import JenkinsJob, JobStatus
+from models.job import JenkinsJob, JobStatus
 
 
 def color_to_status(color: str) -> JobStatus:

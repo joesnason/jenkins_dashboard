@@ -5,8 +5,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.models.user import User
-from src.services.auth import check_authorization
+from models.user import User
+from services.auth import check_authorization
 
 
 class TestCheckAuthorization:

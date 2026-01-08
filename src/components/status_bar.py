@@ -2,8 +2,8 @@
 
 import streamlit as st
 
-from src.models.state import DashboardState
-from src.services.dashboard import calculate_statistics
+from models.state import DashboardState
+from services.dashboard import calculate_statistics
 
 
 def render_status_bar(state: DashboardState) -> None:

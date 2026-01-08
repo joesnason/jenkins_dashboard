@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 
-from src.models.job import JenkinsJob
+from models.job import JenkinsJob
 
 
 @dataclass

@@ -1,12 +1,17 @@
 """Shared pytest fixtures for the Jenkins Dashboard tests."""
 
+import sys
 from datetime import datetime
+from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
 
-from src.models.job import JenkinsJob, JobStatus
-from src.models.user import User
+# Add src directory to Python path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+
+from models.job import JenkinsJob, JobStatus
+from models.user import User
 
 
 @pytest.fixture

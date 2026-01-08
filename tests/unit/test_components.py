@@ -4,8 +4,8 @@ from datetime import datetime
 
 import pytest
 
-from src.components.job_card import get_status_color, get_status_emoji
-from src.models.job import JenkinsJob, JobStatus
+from components.job_card import get_status_color, get_status_emoji
+from models.job import JenkinsJob, JobStatus
 
 
 class TestJobCardFunctions:

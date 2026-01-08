@@ -8,9 +8,9 @@ from unittest.mock import patch
 
 import pytest
 
-from src.models.audit import AuditAction, AuditResult
-from src.models.user import User
-from src.services.audit import AuditService, log_event
+from models.audit import AuditAction, AuditResult
+from models.user import User
+from services.audit import AuditService, log_event
 
 
 class TestLogEvent:
@@ -21,7 +21,7 @@ class TestLogEvent:
         with tempfile.TemporaryDirectory() as tmpdir:
             log_file = Path(tmpdir) / "audit.log"
 
-            with patch("src.services.audit.AUDIT_LOG_PATH", log_file):
+            with patch("services.audit.AUDIT_LOG_PATH", log_file):
                 log_event(
                     action=AuditAction.LOGIN_SUCCESS,
                     result=AuditResult.SUCCESS,
@@ -48,7 +48,7 @@ class TestLogEvent:
         with tempfile.TemporaryDirectory() as tmpdir:
             log_file = Path(tmpdir) / "audit.log"
 
-            with patch("src.services.audit.AUDIT_LOG_PATH", log_file):
+            with patch("services.audit.AUDIT_LOG_PATH", log_file):
                 log_event(
                     action=AuditAction.LOGIN_FAILURE,
                     result=AuditResult.FAILURE,
@@ -71,7 +71,7 @@ class TestLogEvent:
         with tempfile.TemporaryDirectory() as tmpdir:
             log_file = Path(tmpdir) / "audit.log"
 
-            with patch("src.services.audit.AUDIT_LOG_PATH", log_file):
+            with patch("services.audit.AUDIT_LOG_PATH", log_file):
                 log_event(
                     action=AuditAction.ACCESS_DENIED,
                     result=AuditResult.BLOCKED,

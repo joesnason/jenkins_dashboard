@@ -4,9 +4,9 @@ from datetime import datetime
 
 import streamlit as st
 
-from src.models.audit import AuditAction, AuditResult
-from src.models.user import User
-from src.services.audit import log_event
+from models.audit import AuditAction, AuditResult
+from models.user import User
+from services.audit import log_event
 
 # Allowed roles for dashboard access
 ALLOWED_ROLES = {"PM", "RD_Manager", "Admin"}

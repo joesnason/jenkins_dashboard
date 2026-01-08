@@ -1,9 +1,9 @@
 """Services package for the Jenkins Dashboard."""
 
-from src.services.audit import AuditService, log_event
-from src.services.auth import authenticate_user, check_authorization, logout_user
-from src.services.dashboard import DashboardService, calculate_statistics
-from src.services.jenkins import JenkinsService, color_to_status
+from services.audit import AuditService, log_event
+from services.auth import authenticate_user, check_authorization, logout_user
+from services.dashboard import DashboardService, calculate_statistics
+from services.jenkins import JenkinsService, color_to_status
 
 __all__ = [
     "AuditService",

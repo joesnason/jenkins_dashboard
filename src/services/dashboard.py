@@ -2,8 +2,8 @@
 
 from datetime import datetime
 
-from src.models.job import JenkinsJob, JobStatus
-from src.models.state import DashboardState
+from models.job import JenkinsJob, JobStatus
+from models.state import DashboardState
 
 
 def calculate_statistics(jobs: list[JenkinsJob]) -> dict:
