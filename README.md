@@ -22,7 +22,7 @@ A Streamlit-based dashboard for monitoring Jenkins build jobs status, designed f
 ### 1. Clone and Setup
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/joesnason/jenkins_dashboard.git
 cd jenkins_dashboard
 
 # Create virtual environment
