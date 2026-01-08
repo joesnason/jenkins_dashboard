@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jenkins-dashboard
+    ports:
+      - "8501:8501"
+    environment:
+      - JENKINS_URL=${JENKINS_URL:-https://jenkins.example.com}
+      - JENKINS_USER=${JENKINS_USER:-service-account}
+      - JENKINS_API_TOKEN=${JENKINS_API_TOKEN:-your-api-token}
+      - REFRESH_INTERVAL=${REFRESH_INTERVAL:-30}
+    volumes:
+      # Mount secrets file for SSO configuration
+      - ./.streamlit/secrets.toml:/app/.streamlit/secrets.toml:ro
+      # Mount audit logs directory
+      - ./audit_logs:/app/audit_logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Optional: Use this for local development without SSO
+  dashboard-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jenkins-dashboard-dev
+    ports:
+      - "8502:8501"
+    environment:
+      - JENKINS_URL=${JENKINS_URL:-https://jenkins.example.com}
+      - JENKINS_USER=${JENKINS_USER:-service-account}
+      - JENKINS_API_TOKEN=${JENKINS_API_TOKEN:-your-api-token}
+      - REFRESH_INTERVAL=${REFRESH_INTERVAL:-30}
+    volumes:
+      - ./src:/app/src:ro
+      - ./audit_logs:/app/audit_logs
+    profiles:
+      - dev
+    restart: unless-stopped
+
+networks:
+  default:
+    name: jenkins-dashboard-network

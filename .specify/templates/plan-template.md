@@ -31,7 +31,14 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+| Principle | Requirement | Status |
+|-----------|-------------|--------|
+| I. Code Quality | Follows style guides, single responsibility, explicit error handling | [ ] Pass |
+| II. Testing Standards | Unit tests (80%+ coverage), integration tests, contract tests planned | [ ] Pass |
+| III. UX Consistency | Design system compliance, accessibility (WCAG 2.1 AA), responsive | [ ] Pass |
+| IV. Performance | Page load <3s, API p95 <500ms, TTI <5s targets defined | [ ] Pass |
+
+**Quality Gates**: Linting, tests, performance checks, code review, accessibility MUST be enforced in CI.
 
 ## Project Structure
 
