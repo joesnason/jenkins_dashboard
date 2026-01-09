@@ -15,6 +15,7 @@ class AuditAction(Enum):
     LOGOUT = "logout"
     ACCESS_DENIED = "access_denied"
     SESSION_EXPIRED = "session_expired"
+    ADMIN_ACTION = "admin_action"
 
 
 class AuditResult(Enum):

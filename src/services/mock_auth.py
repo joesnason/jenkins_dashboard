@@ -7,82 +7,56 @@ import streamlit as st
 from models.audit import AuditAction, AuditResult
 from models.user import User
 from services.audit import log_event
+from services.mock_ldap import MockLDAPService
+from services.whitelist import WhitelistService
 
-# Demo users
-DEMO_USERS = {
-    "pm_user": User(
-        id="demo-pm-001",
-        email="pm@demo.company.com",
-        name="Alice Chen (PM)",
-        roles=["PM"],
-        login_time=datetime.now(),
-    ),
-    "rd_manager": User(
-        id="demo-rd-002",
-        email="rd.manager@demo.company.com",
-        name="Bob Wang (RD Manager)",
-        roles=["RD_Manager"],
-        login_time=datetime.now(),
-    ),
-    "admin": User(
-        id="demo-admin-003",
-        email="admin@demo.company.com",
-        name="Charlie Liu (Admin)",
-        roles=["Admin"],
-        login_time=datetime.now(),
-    ),
-    "developer": User(
-        id="demo-dev-004",
-        email="developer@demo.company.com",
-        name="David Lee (Developer)",
-        roles=["Developer"],
-        login_time=datetime.now(),
-    ),
-}
-
-# Allowed roles for dashboard access
-ALLOWED_ROLES = {"PM", "RD_Manager", "Admin"}
+# Services
+ldap_service = MockLDAPService()
+whitelist_service = WhitelistService()
 
 
 def mock_authenticate_user() -> User | None:
-    """Authenticate user via demo login selection.
+    """Authenticate user via demo login.
 
     Returns:
-        User object if authenticated, None otherwise
+        User object if authenticated, None otherwise.
     """
-    if "demo_user" in st.session_state and st.session_state.demo_user:
-        user = DEMO_USERS.get(st.session_state.demo_user)
-        if user:
-            # Update login time
-            return User(
-                id=user.id,
-                email=user.email,
-                name=user.name,
-                roles=user.roles,
-                login_time=datetime.now(),
-            )
+    if "demo_user_email" in st.session_state and st.session_state.demo_user_email:
+        email = st.session_state.demo_user_email
+        ldap_user = ldap_service.lookup_user(email)
+        is_admin = whitelist_service.is_admin(email)
+
+        name = ldap_user.display_name if ldap_user else email.split("@")[0].title()
+
+        return User(
+            id=f"demo-{email.split('@')[0]}",
+            email=email,
+            name=name,
+            roles=ldap_user.groups if ldap_user else ["User"],
+            login_time=datetime.now(),
+            is_admin=is_admin,
+        )
     return None
 
 
 def check_authorization(user: User) -> bool:
-    """Check if a user is authorized to access the dashboard.
+    """Check if user is in the whitelist.
 
     Args:
-        user: The user to check
+        user: The user to check.
 
     Returns:
-        True if the user has an allowed role, False otherwise
+        True if user is whitelisted, False otherwise.
     """
-    user_roles = set(user.roles)
-    return bool(user_roles & ALLOWED_ROLES)
+    return whitelist_service.is_user_allowed(user.email)
 
 
 def mock_logout_user(user: User, ip_address: str = "") -> None:
     """Log out the demo user.
 
     Args:
-        user: The user to log out
-        ip_address: The IP address for audit logging
+        user: The user to log out.
+        ip_address: The IP address for audit logging.
     """
     log_event(
         action=AuditAction.LOGOUT,
@@ -92,8 +66,8 @@ def mock_logout_user(user: User, ip_address: str = "") -> None:
     )
 
     # Clear session state
-    if "demo_user" in st.session_state:
-        del st.session_state.demo_user
+    if "demo_user_email" in st.session_state:
+        del st.session_state.demo_user_email
     if "login_logged" in st.session_state:
         del st.session_state.login_logged
 
@@ -102,74 +76,62 @@ def get_client_ip() -> str:
     """Get mock client IP address.
 
     Returns:
-        Mock client IP address string
+        Mock client IP address string.
     """
     return "192.168.1.100"
 
 
 def render_demo_login_page() -> None:
-    """Render the demo login page with user selection."""
+    """Render the demo login page with email/password form."""
     st.title("Jenkins Dashboard")
     st.markdown("---")
 
     # Demo mode banner
-    st.info("**Demo Mode** - Select a user profile to explore the dashboard")
+    st.info("**Demo Mode** - Enter credentials to login")
 
-    st.markdown("### Select Demo User")
+    st.markdown("### Login")
 
-    col1, col2 = st.columns(2)
+    # Login form
+    with st.form("login_form"):
+        email = st.text_input("Email", placeholder="user@demo.company.com")
+        password = st.text_input("Password", type="password", placeholder="Enter password")
+        submitted = st.form_submit_button("Login", type="primary", use_container_width=True)
 
-    with col1:
-        st.markdown("#### Authorized Users")
-
-        if st.button("Login as PM", type="primary", use_container_width=True):
-            st.session_state.demo_user = "pm_user"
-            st.rerun()
-
-        if st.button("Login as RD Manager", type="primary", use_container_width=True):
-            st.session_state.demo_user = "rd_manager"
-            st.rerun()
-
-        if st.button("Login as Admin", type="primary", use_container_width=True):
-            st.session_state.demo_user = "admin"
-            st.rerun()
-
-    with col2:
-        st.markdown("#### Unauthorized User")
-
-        if st.button("Login as Developer", type="secondary", use_container_width=True):
-            st.session_state.demo_user = "developer"
-            st.rerun()
-
-        st.caption("(Will show access denied page)")
+        if submitted:
+            if not email or not password:
+                st.error("Please enter both email and password")
+            else:
+                # Authenticate via mock LDAP
+                ldap_user = ldap_service.authenticate(email, password)
+                if ldap_user:
+                    st.session_state.demo_user_email = email
+                    st.rerun()
+                else:
+                    st.error("Invalid credentials")
 
     st.markdown("---")
-    st.markdown("##### Role Permissions")
+    st.markdown("##### Demo Accounts")
     st.markdown("""
-    | Role | Access |
-    |------|--------|
-    | PM | Full dashboard access |
-    | RD Manager | Full dashboard access |
-    | Admin | Full dashboard access |
-    | Developer | Access denied |
-    """)
+| Email | Password | Type |
+|-------|----------|------|
+| user@demo.company.com | demo123 | User |
+| admin@demo.company.com | admin123 | Admin |
+""")
 
 
 def render_access_denied_page(user: User) -> None:
     """Render the access denied page for unauthorized users.
 
     Args:
-        user: The unauthorized user
+        user: The unauthorized user.
     """
     st.title("Access Denied")
     st.error(
         f"Sorry, {user.name}, you don't have permission to access this dashboard."
     )
     st.markdown("---")
-    st.markdown("This dashboard is only accessible to PM, RD Manager, and Admin roles.")
-    st.markdown(f"Your current roles: {', '.join(user.roles) or 'None'}")
-    st.markdown("---")
-    st.markdown("Please contact your administrator if you believe this is an error.")
+    st.markdown("Your account is not in the allowed users list.")
+    st.markdown("Please contact an administrator to request access.")
 
     if st.button("Back to Login"):
         mock_logout_user(user, get_client_ip())

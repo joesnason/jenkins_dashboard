@@ -140,3 +140,30 @@ class AuditService:
             ip_address=ip_address,
             details={"roles": ",".join(user.roles)},
         )
+
+    def log_admin_action(
+        self,
+        admin: User,
+        action: str,
+        details: dict[str, str] | None = None,
+        ip_address: str = "",
+    ) -> None:
+        """Log an admin action.
+
+        Args:
+            admin: The admin user performing the action.
+            action: Description of the action (e.g., "add_user", "remove_user").
+            details: Additional details about the action.
+            ip_address: The IP address of the request.
+        """
+        full_details: dict[str, str] = {"admin_action": action}
+        if details:
+            full_details.update(details)
+
+        log_event(
+            action=AuditAction.ADMIN_ACTION,
+            result=AuditResult.SUCCESS,
+            user=admin,
+            ip_address=ip_address,
+            details=full_details,
+        )

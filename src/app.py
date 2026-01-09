@@ -101,7 +101,12 @@ def render_header(user: User) -> None:
     if DEMO_MODE:
         st.info("**Demo Mode** - Using mock data for demonstration")
 
-    col1, col2, col3 = st.columns([3, 1, 1])
+    # Adjust columns based on admin status
+    if user.is_admin:
+        col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
+    else:
+        col1, col2, col3 = st.columns([3, 1, 1])
+        col4 = None
 
     with col1:
         st.title("Jenkins Build Status Dashboard")
@@ -118,6 +123,12 @@ def render_header(user: User) -> None:
         if st.button("Logout"):
             logout_user(user, get_client_ip())
             st.rerun()
+
+    if col4 is not None:
+        with col4:
+            # Admin button (only for admin users)
+            if st.button("Admin"):
+                st.switch_page("pages/Admin.py")
 
 
 def render_refresh_controls() -> None:

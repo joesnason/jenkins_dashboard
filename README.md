@@ -1,21 +1,23 @@
 # Jenkins Build Status Dashboard
 
-A Streamlit-based dashboard for monitoring Jenkins build jobs status, designed for PM and RD Managers.
+A Streamlit-based dashboard for monitoring Jenkins build jobs status.
 
 ## Features
 
 - Real-time view of all Jenkins job statuses
 - Auto-refresh every 30 seconds
-- SSO authentication with role-based access control
+- SSO authentication with whitelist-based access control
+- Admin backend for user management
 - Job filtering and sorting
 - Expandable job details with build history
 - Graceful degradation when Jenkins is unavailable
+- Audit logging for all authentication and admin events
 
 ## Requirements
 
 - Python 3.11+
 - Jenkins server with API access
-- Company SSO (OIDC-compatible)
+- Company SSO (OIDC-compatible) or LDAP
 
 ## Quick Start
 
@@ -78,6 +80,13 @@ streamlit run src/app.py
 
 ### Demo Features
 
+**Demo Accounts:**
+
+| Email | Password | Type | Access |
+|-------|----------|------|--------|
+| user@demo.company.com | demo123 | User | Dashboard |
+| admin@demo.company.com | admin123 | Admin | Dashboard + Admin Backend |
+
 **Mock Jenkins Jobs (15 jobs):**
 
 | Job Name | Status |
@@ -98,20 +107,36 @@ streamlit run src/app.py
 | security-scan | Success |
 | docker-registry-push | Not Built |
 
-**Demo Users:**
-
-| User | Role | Access |
-|------|------|--------|
-| Alice Chen | PM | Dashboard Access |
-| Bob Wang | RD Manager | Dashboard Access |
-| Charlie Liu | Admin | Dashboard Access |
-| David Lee | Developer | Access Denied |
-
-The Developer role is included to demonstrate the access control functionality.
-
 ### Switch Back to Production Mode
 
 Set `DEMO_MODE=false` in `.env` and configure your real Jenkins and SSO credentials.
+
+## Admin Backend
+
+Administrators can access the admin backend to:
+
+1. **Manage User Whitelist** - Add/remove users who can access the dashboard
+2. **View Audit Logs** - Monitor login attempts, access denials, and admin actions
+
+Access the admin backend:
+- Login with an admin account
+- Click the "Admin" button in the dashboard header
+
+### User Whitelist
+
+The whitelist is stored in `src/data/allowed_users.json`:
+
+```json
+{
+  "version": "1.0",
+  "users": [
+    {"email": "user@company.com", "name": "User Name", "active": true, ...}
+  ],
+  "admins": [
+    {"email": "admin@company.com", "name": "Admin Name", "active": true, ...}
+  ]
+}
+```
 
 ## Development
 
@@ -178,23 +203,39 @@ docker-compose up -d
 ```
 jenkins_dashboard/
 ├── src/
-│   ├── app.py              # Streamlit application entry point
-│   ├── models/             # Data models
-│   ├── services/           # Business logic services
-│   │   ├── auth.py         # SSO authentication
-│   │   ├── jenkins.py      # Jenkins API client
-│   │   ├── mock_auth.py    # Mock auth for demo mode
-│   │   └── mock_jenkins.py # Mock Jenkins for demo mode
-│   └── components/         # UI components
+│   ├── app.py                  # Main Streamlit application
+│   ├── models/                 # Data models
+│   │   ├── user.py             # User model
+│   │   ├── whitelist.py        # Whitelist models
+│   │   ├── audit.py            # Audit log models
+│   │   └── job.py              # Jenkins job models
+│   ├── services/               # Business logic services
+│   │   ├── auth.py             # SSO authentication
+│   │   ├── jenkins.py          # Jenkins API client
+│   │   ├── whitelist.py        # Whitelist management
+│   │   ├── audit.py            # Audit logging
+│   │   ├── mock_auth.py        # Mock auth for demo mode
+│   │   ├── mock_jenkins.py     # Mock Jenkins for demo mode
+│   │   └── mock_ldap.py        # Mock LDAP for demo mode
+│   ├── components/             # UI components
+│   │   ├── job_table.py        # Job table component
+│   │   ├── status_bar.py       # Status bar component
+│   │   └── admin/              # Admin UI components
+│   │       ├── user_management.py
+│   │       └── audit_viewer.py
+│   ├── pages/                  # Streamlit multipage
+│   │   └── Admin.py            # Admin backend page
+│   └── data/                   # Data files
+│       └── allowed_users.json  # User whitelist
 ├── tests/
-│   ├── unit/               # Unit tests
-│   ├── integration/        # Integration tests
-│   └── conftest.py         # Shared fixtures
+│   ├── unit/                   # Unit tests
+│   ├── integration/            # Integration tests
+│   └── conftest.py             # Shared fixtures
 ├── .streamlit/
-│   └── config.toml         # Streamlit configuration
-├── requirements.txt        # Runtime dependencies
-├── requirements-dev.txt    # Development dependencies
-└── pyproject.toml          # Project configuration
+│   └── config.toml             # Streamlit configuration
+├── requirements.txt            # Runtime dependencies
+├── requirements-dev.txt        # Development dependencies
+└── pyproject.toml              # Project configuration
 ```
 
 ## Architecture
@@ -205,9 +246,10 @@ jenkins_dashboard/
 
 ## Security
 
-- SSO authentication required for all users
-- Role-based access control (PM, RD_Manager, Admin roles)
-- Audit logging for all authentication events
+- SSO/LDAP authentication required for all users
+- Whitelist-based access control (managed by admins)
+- Separate admin backend for user management
+- Audit logging for all authentication and admin events
 - API tokens stored securely in secrets
 
 ## License

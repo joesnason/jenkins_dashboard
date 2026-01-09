@@ -1,0 +1,23 @@
+{
+  "version": "1.0",
+  "last_updated": "2026-01-09T00:00:00Z",
+  "updated_by": "system",
+  "users": [
+    {
+      "email": "user@demo.company.com",
+      "name": "Demo User",
+      "added_at": "2026-01-09T00:00:00Z",
+      "added_by": "system",
+      "active": true
+    }
+  ],
+  "admins": [
+    {
+      "email": "admin@demo.company.com",
+      "name": "Demo Admin",
+      "added_at": "2026-01-09T00:00:00Z",
+      "added_by": "system",
+      "active": true
+    }
+  ]
+}

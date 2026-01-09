@@ -7,55 +7,52 @@ import streamlit as st
 from models.audit import AuditAction, AuditResult
 from models.user import User
 from services.audit import log_event
+from services.whitelist import WhitelistService
 
-# Allowed roles for dashboard access
-ALLOWED_ROLES = {"PM", "RD_Manager", "Admin"}
+whitelist_service = WhitelistService()
 
 
 def authenticate_user() -> User | None:
     """Authenticate the current user from Streamlit SSO.
 
     Returns:
-        User object if authenticated, None otherwise
+        User object if authenticated, None otherwise.
     """
     if not hasattr(st, "user") or not st.user.is_logged_in:
         return None
 
-    user_id = st.user.get("sub", "")
     email = st.user.get("email", "")
-    name = st.user.get("name", "")
-    groups = st.user.get("groups", [])
+    is_admin = whitelist_service.is_admin(email)
 
     return User(
-        id=user_id,
+        id=st.user.get("sub", ""),
         email=email,
-        name=name,
-        roles=groups,
+        name=st.user.get("name", ""),
+        roles=st.user.get("groups", []),
         login_time=datetime.now(),
+        is_admin=is_admin,
     )
 
 
 def check_authorization(user: User) -> bool:
-    """Check if a user is authorized to access the dashboard.
+    """Check if user email is in the whitelist.
 
     Args:
-        user: The user to check
+        user: The user to check.
 
     Returns:
-        True if the user has an allowed role, False otherwise
+        True if user is whitelisted, False otherwise.
     """
-    user_roles = set(user.roles)
-    return bool(user_roles & ALLOWED_ROLES)
+    return whitelist_service.is_user_allowed(user.email)
 
 
 def logout_user(user: User, ip_address: str = "") -> None:
     """Log out the current user.
 
     Args:
-        user: The user to log out
-        ip_address: The IP address for audit logging
+        user: The user to log out.
+        ip_address: The IP address for audit logging.
     """
-    # Log the logout event
     log_event(
         action=AuditAction.LOGOUT,
         result=AuditResult.SUCCESS,
@@ -63,7 +60,6 @@ def logout_user(user: User, ip_address: str = "") -> None:
         ip_address=ip_address,
     )
 
-    # Call Streamlit logout
     st.logout()
 
 
@@ -71,14 +67,9 @@ def get_client_ip() -> str:
     """Get the client IP address from the request.
 
     Returns:
-        Client IP address string
+        Client IP address string.
     """
-    # In Streamlit, we can try to get this from headers
-    # This is a simplified version - in production you'd want to check
-    # X-Forwarded-For header for proxied requests
     try:
-        # Streamlit doesn't directly expose client IP
-        # This is a placeholder for proper implementation
         return "unknown"
     except Exception:
         return "unknown"
@@ -99,17 +90,15 @@ def render_access_denied_page(user: User) -> None:
     """Render the access denied page for unauthorized users.
 
     Args:
-        user: The unauthorized user
+        user: The unauthorized user.
     """
     st.title("Access Denied")
     st.error(
         f"Sorry, {user.name}, you don't have permission to access this dashboard."
     )
     st.markdown("---")
-    st.markdown("This dashboard is only accessible to PM and RD Manager roles.")
-    st.markdown(f"Your current roles: {', '.join(user.roles) or 'None'}")
-    st.markdown("---")
-    st.markdown("Please contact your administrator if you believe this is an error.")
+    st.markdown("Your account is not in the allowed users list.")
+    st.markdown("Please contact an administrator to request access.")
 
     if st.button("Logout"):
         logout_user(user, get_client_ip())

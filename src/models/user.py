@@ -13,3 +13,4 @@ class User:
     name: str
     roles: list[str]
     login_time: datetime
+    is_admin: bool = False
