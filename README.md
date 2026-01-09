@@ -57,6 +57,62 @@ streamlit run src/app.py
 
 Open http://localhost:8501 in your browser.
 
+## Demo Mode
+
+For demonstrations or development without a real Jenkins/SSO setup, enable Demo Mode:
+
+### Enable Demo Mode
+
+Set `DEMO_MODE=true` in your `.env` file:
+
+```bash
+# .env
+DEMO_MODE=true
+```
+
+Then run the app normally:
+
+```bash
+streamlit run src/app.py
+```
+
+### Demo Features
+
+**Mock Jenkins Jobs (15 jobs):**
+
+| Job Name | Status |
+|----------|--------|
+| frontend-build | Success |
+| backend-api | Success |
+| auth-service | Failure |
+| payment-gateway | Building |
+| user-service | Success |
+| notification-service | Unstable |
+| analytics-pipeline | Success |
+| mobile-app-ios | Success |
+| mobile-app-android | Failure |
+| infrastructure-terraform | Success |
+| database-migration | Disabled |
+| e2e-tests | Success |
+| performance-tests | Aborted |
+| security-scan | Success |
+| docker-registry-push | Not Built |
+
+**Demo Users:**
+
+| User | Role | Access |
+|------|------|--------|
+| Alice Chen | PM | Dashboard Access |
+| Bob Wang | RD Manager | Dashboard Access |
+| Charlie Liu | Admin | Dashboard Access |
+| David Lee | Developer | Access Denied |
+
+The Developer role is included to demonstrate the access control functionality.
+
+### Switch Back to Production Mode
+
+Set `DEMO_MODE=false` in `.env` and configure your real Jenkins and SSO credentials.
+
 ## Development
 
 ### Install Development Dependencies
@@ -99,8 +155,12 @@ mypy src
 # Build image
 docker build -t jenkins-dashboard .
 
-# Run container
+# Run in demo mode
+docker run -p 8501:8501 -e DEMO_MODE=true jenkins-dashboard
+
+# Run with real Jenkins
 docker run -p 8501:8501 \
+  -e DEMO_MODE=false \
   -e JENKINS_URL=https://jenkins.company.com \
   -e JENKINS_USER=service-account \
   -e JENKINS_API_TOKEN=your-token \
@@ -121,6 +181,10 @@ jenkins_dashboard/
 │   ├── app.py              # Streamlit application entry point
 │   ├── models/             # Data models
 │   ├── services/           # Business logic services
+│   │   ├── auth.py         # SSO authentication
+│   │   ├── jenkins.py      # Jenkins API client
+│   │   ├── mock_auth.py    # Mock auth for demo mode
+│   │   └── mock_jenkins.py # Mock Jenkins for demo mode
 │   └── components/         # UI components
 ├── tests/
 │   ├── unit/               # Unit tests

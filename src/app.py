@@ -1,5 +1,6 @@
 """Main Streamlit application for Jenkins Build Status Dashboard."""
 
+import os
 import time
 from datetime import datetime
 
@@ -10,20 +11,35 @@ from components.job_table import render_job_table
 from components.status_bar import render_connection_status, render_status_bar
 from models.exceptions import JenkinsConnectionError
 from models.user import User
-from services.auth import (
-    authenticate_user,
-    check_authorization,
-    get_client_ip,
-    logout_user,
-    render_access_denied_page,
-    render_login_page,
-)
 from services.audit import AuditService
 from services.dashboard import DashboardService
-from services.jenkins import JenkinsService
 
 # Load environment variables
 load_dotenv()
+
+# Check if running in demo mode
+DEMO_MODE = os.environ.get("DEMO_MODE", "false").lower() == "true"
+
+if DEMO_MODE:
+    from services.mock_auth import (
+        check_authorization,
+        get_client_ip,
+        mock_authenticate_user as authenticate_user,
+        mock_logout_user as logout_user,
+        render_access_denied_page,
+        render_demo_login_page as render_login_page,
+    )
+    from services.mock_jenkins import MockJenkinsService
+else:
+    from services.auth import (
+        authenticate_user,
+        check_authorization,
+        get_client_ip,
+        logout_user,
+        render_access_denied_page,
+        render_login_page,
+    )
+    from services.jenkins import JenkinsService
 
 # Page configuration
 st.set_page_config(
@@ -60,7 +76,10 @@ def fetch_jobs() -> tuple[list, bool, str | None]:
         Tuple of (jobs list, is_available, error_message)
     """
     try:
-        service = JenkinsService()
+        if DEMO_MODE:
+            service = MockJenkinsService()
+        else:
+            service = JenkinsService()
         jobs = service.get_all_jobs()
         return jobs, True, None
     except JenkinsConnectionError as e:
@@ -79,6 +98,9 @@ def render_header(user: User) -> None:
     Args:
         user: The authenticated user
     """
+    if DEMO_MODE:
+        st.info("**Demo Mode** - Using mock data for demonstration")
+
     col1, col2, col3 = st.columns([3, 1, 1])
 
     with col1:
